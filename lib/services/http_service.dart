@@ -47,20 +47,13 @@ class HttpService {
 
   static Future<http.Response> login(user, password, context) async {
 
-    String bodyEmail = jsonEncode(<String, String>{
+    String body = jsonEncode(<String, String>{
       'email': user,
       'password': password
     });
 
-    String bodyRegistrationTag = jsonEncode(<String, String>{
-      'registration_tag': user,
-      'password': password
-    });
-
-    String body = user.toString().contains("@") ? bodyEmail : bodyRegistrationTag;
-
     final response = await http.post(
-      Uri.parse('${globalPath}mode/admin/login/token'),
+      Uri.parse('${globalPath}user/login/token'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -73,13 +66,14 @@ class HttpService {
     }
 
     var json = jsonDecode(response.body);
+
     var jsonUser = json['user'];
 
     if (response.statusCode == 200) {
       if (json['message'] == 'Access success') {
         final SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
         sharedPreferences.setString("token", json['token']);
-        sharedPreferences.setString("registration_tag", jsonUser['registration_tag']);
+        sharedPreferences.setString("curp", jsonUser['curp']);
 
         await EasyLoading.showSuccess("Ingreso exitoso");
         Navigator.pushAndRemoveUntil(
